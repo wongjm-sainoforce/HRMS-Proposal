@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRMS AI Module Future Plans — Wong Jun Meng</title>
+<meta name="description" content="A business case for three AI initiatives across the Sainoforce HRMS platform.">
+
+<!-- Fonts: Clash Display (display) + Satoshi (body) via Fontshare -->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================================
+   THEME — "EXECUTIVE NAVY"
+   Change these variables to retheme the entire deck.
+   ===================================================================== */
+:root{
+  --stage-bg:#04070f;            /* letterbox / outside the stage */
+  --slide-bg:#070e1c;            /* base slide colour */
+  --navy-0:#04070f;
+  --navy-1:#0a1730;
+  --navy-2:#0c1c3a;
+
+  --ink:#eaf2ff;                 /* primary text */
+  --muted:#93a8c7;               /* secondary text */
+  --faint:#6f86a8;               /* tertiary text */
+
+  --azure:#38bdf8;               /* primary accent */
+  --cyan:#67e8f9;                /* bright accent */
+  --cobalt:#3b82f6;              /* chart blue */
+  --violet:#a78bfa;              /* secondary chart hue */
+  --good:#34d399;                /* positive / "after" */
+  --warn:#fbbf24;                /* caution (80% alert) */
+  --bad:#fb7185;                 /* pain / "before" */
+
+  --card:rgba(255,255,255,.035);
+  --card-2:rgba(255,255,255,.055);
+  --line:rgba(125,165,225,.16);
+  --line-2:rgba(125,165,225,.30);
+
+  --font-display:'Clash Display','Satoshi',system-ui,sans-serif;
+  --font-body:'Satoshi',system-ui,sans-serif;
+
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* =====================================================================
+   FIXED 16:9 STAGE — viewport-base.css (included in full, mandatory)
+   ===================================================================== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--stage-bg,#000);}
+.deck-viewport{position:fixed;inset:0;overflow:hidden;background:var(--stage-bg,#000);}
+.deck-stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;transform-origin:0 0;background:var(--slide-bg,#fff);}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;display:block;visibility:hidden;opacity:0;pointer-events:none;background:var(--slide-bg,#fff);}
+.slide.active,.slide.visible{visibility:visible;opacity:1;pointer-events:auto;z-index:1;}
+img,video,canvas,svg{max-width:100%;max-height:100%;}
+@media print{
+  html,body{width:1920px;height:auto;overflow:visible;background:#fff;}
+  .deck-viewport{position:static;overflow:visible;background:#fff;}
+  .deck-stage{position:static;width:auto;height:auto;transform:none !important;background:none;}
+  .slide{position:relative;display:block !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;width:1920px;height:1080px;break-after:page;page-break-after:always;}
+  .slide:last-child{break-after:auto;page-break-after:auto;}
+  .deck-controls{display:none !important;}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.2s !important;animation-iteration-count:1 !important;}
+}
+
+/* =====================================================================
+   SHARED SLIDE CHROME
+   Every slide shares the navy background + dot-grid + ambient glow.
+   ===================================================================== */
+.slide{
+  color:var(--ink);
+  font-family:var(--font-body);
+  background:
+    radial-gradient(1100px 720px at 82% 12%, rgba(56,189,248,.13), transparent 60%),
+    radial-gradient(950px 700px at 8% 96%, rgba(37,99,235,.17), transparent 60%),
+    linear-gradient(150deg, var(--navy-0) 0%, var(--navy-1) 50%, var(--navy-2) 100%);
+}
+.slide::before{                       /* faint dot grid for depth */
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(140,170,230,.085) 1.2px, transparent 1.2px);
+  background-size:46px 46px;
+  -webkit-mask-image:linear-gradient(125deg, rgba(0,0,0,.9), rgba(0,0,0,.12) 72%);
+  mask-image:linear-gradient(125deg, rgba(0,0,0,.9), rgba(0,0,0,.12) 72%);
+  pointer-events:none;
+}
+.frame{position:absolute;inset:0;padding:78px 104px;display:flex;flex-direction:column;}
+
+/* slide header (eyebrow + title) */
+.eyebrow{font-family:var(--font-display);font-weight:500;letter-spacing:.26em;text-transform:uppercase;font-size:21px;color:var(--azure);margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.eyebrow::before{content:"";width:30px;height:2px;background:var(--azure);box-shadow:0 0 12px var(--azure);}
+.s-title{font-family:var(--font-display);font-weight:600;font-size:62px;line-height:1.02;letter-spacing:-.02em;color:var(--ink);max-width:1500px;}
+.s-title .hl{color:transparent;background:linear-gradient(100deg,#7dd3fc,#67e8f9 55%,#c7b3ff);-webkit-background-clip:text;background-clip:text;}
+.s-head{margin-bottom:34px;}
+.s-body{flex:1;min-height:0;display:flex;flex-direction:column;}
+
+/* in-slide footer (report-style) */
+.s-foot{position:absolute;left:104px;right:104px;bottom:40px;display:flex;justify-content:space-between;align-items:center;font-size:16px;color:var(--faint);letter-spacing:.04em;}
+.s-foot .b{color:#9fb6d8;font-weight:600;}
+.s-foot .dotline{flex:1;height:1px;margin:0 22px;background:linear-gradient(90deg,var(--line),transparent);}
+
+/* =====================================================================
+   REVEAL ANIMATIONS — play when a slide gets .visible
+   ===================================================================== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.slide.visible .reveal{opacity:1;transform:none;}
+.slide.visible .reveal.d1{transition-delay:.08s}
+.slide.visible .reveal.d2{transition-delay:.18s}
+.slide.visible .reveal.d3{transition-delay:.28s}
+.slide.visible .reveal.d4{transition-delay:.38s}
+.slide.visible .reveal.d5{transition-delay:.48s}
+.slide.visible .reveal.d6{transition-delay:.58s}
+.slide.visible .reveal.d7{transition-delay:.68s}
+.slide.visible .reveal.d8{transition-delay:.78s}
+
+/* =====================================================================
+   GENERIC CARDS / PANELS / CHIPS
+   ===================================================================== */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:38px 40px;backdrop-filter:blur(2px);}
+.panel h3{font-family:var(--font-display);font-weight:600;font-size:26px;color:#dcecff;margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.panel .ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:var(--cyan);flex:none;}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:42px;flex:1;min-height:0;}
+
+.bullets{list-style:none;display:flex;flex-direction:column;gap:18px;}
+.bullets li{display:flex;gap:16px;font-size:23px;line-height:1.4;color:#cdd9ee;}
+.bullets li .mk{flex:none;width:11px;height:11px;border-radius:50%;margin-top:9px;}
+.bullets.pain li .mk{background:var(--bad);box-shadow:0 0 10px rgba(251,113,133,.6);}
+.bullets.win li .mk{background:var(--good);box-shadow:0 0 10px rgba(52,211,153,.6);}
+.bullets li b{color:#fff;font-weight:600;}
+.bullets li .sub{color:var(--muted);font-size:19px;display:block;margin-top:2px;}
+
+.callout{margin-top:22px;border-radius:16px;padding:22px 26px;background:linear-gradient(100deg,rgba(56,189,248,.12),rgba(167,139,250,.08));border:1px solid rgba(103,232,249,.28);font-size:21px;color:#dbeafe;line-height:1.45;}
+.callout b{color:var(--cyan);}
+
+.chips{display:flex;flex-wrap:wrap;gap:14px;}
+.chip{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line-2);background:var(--card);border-radius:100px;padding:12px 22px;font-size:19px;color:#cfe0ff;font-weight:500;}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--azure);box-shadow:0 0 10px var(--azure);}
+.chip.good .d{background:var(--good);box-shadow:0 0 10px var(--good);}
+
+/* stat tiles */
+.stats{display:grid;gap:20px;}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;}
+.stat .v{font-family:var(--font-display);font-weight:600;font-size:46px;line-height:1;color:#fff;letter-spacing:-.01em;}
+.stat .v small{font-size:26px;color:var(--azure);font-weight:600;}
+.stat .l{font-size:18px;color:var(--muted);margin-top:10px;letter-spacing:.02em;}
+
+/* =====================================================================
+   CHART: VERTICAL BARS
+   ===================================================================== */
+.barchart{display:flex;align-items:flex-end;gap:30px;flex:1;min-height:0;padding-top:54px;}
+.barchart .bar{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;}
+.barchart .track{width:100%;flex:1;display:flex;align-items:flex-end;}
+.barchart .col{position:relative;width:100%;max-width:118px;margin:0 auto;height:0;border-radius:12px 12px 5px 5px;
+  background:linear-gradient(180deg,var(--c1,#38bdf8),var(--c2,rgba(37,99,235,.25)));
+  box-shadow:0 0 26px -6px var(--c1,#38bdf8);transition:height 1.1s var(--ease);}
+.slide.visible .barchart .col{height:var(--h);}
+.barchart .col .v{position:absolute;top:-44px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:var(--font-display);font-weight:600;font-size:27px;color:#fff;}
+.barchart .lab{margin-top:18px;text-align:center;font-size:19px;color:var(--muted);line-height:1.3;}
+
+/* =====================================================================
+   CHART: HORIZONTAL BUDGET GAUGE
+   ===================================================================== */
+.gauge-wrap{margin-top:6px;}
+.gauge{position:relative;height:30px;border-radius:100px;background:rgba(255,255,255,.07);border:1px solid var(--line);overflow:visible;}
+.gauge .fill{height:100%;width:0;border-radius:100px;background:linear-gradient(90deg,var(--cyan),var(--azure));box-shadow:0 0 20px -2px var(--azure);transition:width 1.3s var(--ease);}
+.slide.visible .gauge .fill{width:var(--w);}
+.gauge .mark{position:absolute;top:-8px;bottom:-8px;width:2px;background:var(--m,rgba(255,255,255,.5));}
+.gauge .mark .t{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:15px;color:var(--m);white-space:nowrap;font-weight:600;}
+.gauge-scale{display:flex;justify-content:space-between;margin-top:14px;font-size:16px;color:var(--faint);}
+
+/* =====================================================================
+   SKILLS DIAGRAM (Plan 2)
+   ===================================================================== */
+.hub{align-self:center;text-align:center;background:linear-gradient(100deg,rgba(56,189,248,.16),rgba(167,139,250,.12));border:1px solid rgba(103,232,249,.4);border-radius:16px;padding:20px 34px;max-width:560px;}
+.hub .t{font-family:var(--font-display);font-weight:600;font-size:25px;color:#fff;}
+.hub .s{font-size:17px;color:var(--cyan);margin-top:4px;letter-spacing:.04em;}
+.spokes{height:54px;width:100%;}
+.skill-row{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.skill{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;text-align:center;}
+.skill .ic{font-size:26px;}
+.skill .t{font-family:var(--font-display);font-weight:600;font-size:22px;color:#eaf4ff;margin:10px 0 6px;}
+.skill .d{font-size:17px;color:var(--muted);line-height:1.35;}
+.skill .tag{display:inline-block;margin-top:12px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--azure);border:1px solid var(--line-2);border-radius:100px;padding:5px 14px;}
+
+/* =====================================================================
+   WORKFLOW (Plan 3): stage chips + human gates
+   ===================================================================== */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;}
+.flow .stage{flex:1;min-width:108px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 12px;text-align:center;position:relative;}
+.flow .stage .n{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--azure);}
+.flow .stage .t{font-family:var(--font-display);font-weight:600;font-size:21px;color:#fff;margin-top:6px;}
+.flow .stage .d{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.3;}
+.flow .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;flex:none;color:var(--faint);font-size:22px;position:relative;}
+.flow .arrow .gate{position:absolute;top:-14px;font-size:11px;letter-spacing:.08em;color:var(--warn);border:1px solid rgba(251,191,36,.5);border-radius:100px;padding:3px 8px;background:rgba(251,191,36,.08);white-space:nowrap;}
+
+/* =====================================================================
+   BEFORE / AFTER COMPARISON (Plan 3)
+   ===================================================================== */
+.ba{display:flex;flex-direction:column;gap:14px;flex:1;}
+.ba .row{display:grid;grid-template-columns:230px 1fr 1fr;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 22px;}
+.ba .row.head{background:transparent;border:none;padding:0 22px;}
+.ba .row.head .h{font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+.ba .k{font-family:var(--font-display);font-weight:600;font-size:21px;color:#dcecff;}
+.ba .before{color:var(--muted);font-size:19px;display:flex;align-items:center;gap:12px;}
+.ba .after{color:#eafaf3;font-size:19px;display:flex;align-items:center;gap:12px;font-weight:500;}
+.ba .before .x{color:var(--bad);font-weight:700;}
+.ba .after .c{color:var(--good);font-weight:700;}
+
+/* =====================================================================
+   ROADMAP (combined)
+   ===================================================================== */
+.road{display:flex;flex-direction:column;gap:24px;flex:1;justify-content:center;}
+.lane{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:center;}
+.lane .name{font-family:var(--font-display);font-weight:600;font-size:23px;color:#eaf4ff;}
+.lane .name .s{display:block;font-family:var(--font-body);font-weight:400;font-size:16px;color:var(--muted);margin-top:3px;}
+.track-row{display:flex;align-items:center;gap:14px;}
+.ph{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;}
+.ph.start{border-color:rgba(103,232,249,.5);background:linear-gradient(100deg,rgba(56,189,248,.14),rgba(56,189,248,.03));}
+.ph .p{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--azure);font-weight:600;}
+.ph .t{font-size:19px;color:#e6f0ff;margin-top:5px;line-height:1.3;}
+.ph .flag{position:absolute;top:-12px;right:14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#04121f;background:var(--cyan);border-radius:100px;padding:3px 11px;font-weight:700;box-shadow:0 0 16px -2px var(--cyan);}
+.road .conn{color:var(--faint);font-size:20px;flex:none;}
+
+/* =====================================================================
+   INVESTMENT cards
+   ===================================================================== */
+.inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;flex:1;}
+.inv{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px 30px;display:flex;flex-direction:column;}
+.inv .tag{font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--azure);font-weight:600;}
+.inv .name{font-family:var(--font-display);font-weight:600;font-size:26px;color:#fff;margin:8px 0 22px;}
+.inv .metric{margin-bottom:18px;}
+.inv .metric .v{font-family:var(--font-display);font-weight:600;font-size:34px;color:#eafaff;line-height:1.05;}
+.inv .metric .v small{font-size:20px;color:var(--azure);}
+.inv .metric .l{font-size:17px;color:var(--muted);margin-top:4px;}
+.inv .foot{margin-top:auto;padding-top:18px;border-top:1px solid var(--line);font-size:17px;color:var(--good);display:flex;align-items:center;gap:10px;}
+
+/* =====================================================================
+   TITLE SLIDE
+   ===================================================================== */
+.title-slide .frame{padding:96px 120px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;}
+.wordmark{display:flex;align-items:center;gap:18px;font-family:var(--font-display);font-weight:600;letter-spacing:.34em;font-size:22px;color:#cfe0ff;text-transform:uppercase;}
+.wordmark .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--azure));box-shadow:0 0 22px rgba(56,189,248,.8);}
+.status-pill{display:inline-flex;align-items:center;gap:12px;border:1px solid rgba(103,232,249,.45);border-radius:100px;padding:13px 26px;font-size:18px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);background:rgba(56,189,248,.06);}
+.status-pill .blip{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:blip 2.4s ease-in-out infinite;}
+@keyframes blip{0%,100%{opacity:1}50%{opacity:.3}}
+.t-hero{margin-top:auto;margin-bottom:auto;max-width:1340px;}
+.t-eyebrow{font-family:var(--font-display);font-weight:500;letter-spacing:.30em;text-transform:uppercase;font-size:22px;color:var(--azure);margin:0 0 30px;}
+.t-title{font-family:var(--font-display);font-weight:600;font-size:152px;line-height:.95;letter-spacing:-.02em;margin:0;}
+.t-title .l1 span,.t-title .l2 span{display:block;}
+.t-title .l1{overflow:hidden;}.t-title .l2{overflow:hidden;}
+.t-rule{height:3px;width:230px;margin:46px 0 36px;background:linear-gradient(90deg,var(--azure),transparent);border-radius:3px;box-shadow:0 0 18px rgba(56,189,248,.55);}
+.t-sub{font-size:31px;line-height:1.5;color:var(--muted);max-width:1080px;margin:0;}
+.t-sub b{color:#dbe8ff;font-weight:600;}
+.t-foot{display:flex;justify-content:space-between;align-items:flex-end;}
+.t-foot .who{font-family:var(--font-display);font-weight:600;font-size:31px;color:var(--ink);}
+.t-foot .role{font-size:19px;color:var(--muted);margin-top:6px;}
+.t-foot .meta{text-align:right;font-size:19px;color:var(--muted);line-height:1.7;}
+.t-foot .meta b{color:#bcd2f5;font-weight:600;}
+.t-viz{position:absolute;right:120px;bottom:172px;width:480px;height:270px;opacity:.5;pointer-events:none;}
+
+/* TOC */
+.toc-list{display:grid;grid-template-columns:1fr 1fr;gap:20px 60px;flex:1;align-content:center;}
+.toc-item{display:flex;gap:26px;align-items:flex-start;padding:22px 8px;border-top:1px solid var(--line);}
+.toc-item .n{font-family:var(--font-display);font-weight:600;font-size:34px;color:var(--azure);min-width:54px;}
+.toc-item .tt{font-family:var(--font-display);font-weight:600;font-size:28px;color:#eaf4ff;}
+.toc-item .dd{font-size:18px;color:var(--muted);margin-top:5px;}
+
+/* OPPORTUNITY 3-up */
+.opp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.opp{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px 32px;position:relative;overflow:hidden;}
+.opp .num{font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--azure);letter-spacing:.04em;}
+.opp .ti{font-family:var(--font-display);font-weight:600;font-size:30px;color:#fff;margin:14px 0 14px;line-height:1.05;}
+.opp .de{font-size:20px;color:var(--muted);line-height:1.45;}
+.opp .glow{position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.18),transparent 65%);}
+
+/* legend for payback */
+.legend{display:flex;gap:24px;margin-top:14px;font-size:17px;color:var(--muted);}
+.legend span{display:flex;align-items:center;gap:9px;}
+.legend i{width:22px;height:4px;border-radius:3px;display:inline-block;}
+
+/* THE ASK recap rows */
+.ask-rows{display:flex;flex-direction:column;gap:16px;}
+.ask-row{display:grid;grid-template-columns:64px 1fr auto;gap:24px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 28px;}
+.ask-row .n{font-family:var(--font-display);font-weight:600;font-size:30px;color:var(--azure);}
+.ask-row .nm{font-family:var(--font-display);font-weight:600;font-size:25px;color:#fff;}
+.ask-row .ds{font-size:18px;color:var(--muted);margin-top:3px;}
+.ask-row .val{text-align:right;font-size:18px;color:var(--good);font-weight:600;white-space:nowrap;}
+.ask-box{margin-top:22px;border-radius:18px;padding:26px 32px;background:linear-gradient(100deg,rgba(56,189,248,.14),rgba(167,139,250,.08));border:1px solid rgba(103,232,249,.32);}
+.ask-box .h{font-family:var(--font-display);font-weight:600;font-size:24px;color:#fff;margin-bottom:8px;}
+.ask-box p{font-size:20px;color:#d7e6fb;line-height:1.45;}
+.tagline-final{margin-top:20px;text-align:center;font-family:var(--font-display);font-weight:500;font-size:24px;letter-spacing:.02em;color:var(--cyan);}
+
+/* =====================================================================
+   DECK CHROME (outside the slide design system)
+   ===================================================================== */
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--azure),var(--cyan));box-shadow:0 0 12px var(--azure);z-index:1000;transition:width .4s var(--ease);}
+.deck-controls{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;background:rgba(8,18,36,.7);border:1px solid var(--line);border-radius:100px;padding:8px 10px;backdrop-filter:blur(10px);}
+.deck-controls button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:transparent;color:#cfe0ff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.deck-controls button:hover{background:rgba(56,189,248,.18);border-color:var(--azure);color:#fff;}
+.deck-controls .count{font-size:15px;color:var(--muted);padding:0 12px;font-variant-numeric:tabular-nums;letter-spacing:.06em;}
+.hint{position:fixed;right:18px;bottom:24px;z-index:1000;font-size:13px;color:var(--faint);letter-spacing:.04em;opacity:.7;}
+/* auto-hide chrome while reading; reappears on mouse/key activity */
+.deck-controls,.hint{transition:opacity .45s ease;}
+body.chrome-hidden .deck-controls,body.chrome-hidden .hint{opacity:0;pointer-events:none;}
+
+/* inline editor */
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000;cursor:pointer;}
+.edit-toggle{position:fixed;top:16px;left:16px;width:44px;height:44px;border-radius:12px;border:1px solid var(--line-2);background:rgba(8,18,36,.85);color:#cfe0ff;font-size:18px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:10001;}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto;}
+.edit-toggle.active{background:var(--azure);color:#04121f;border-color:var(--azure);}
+.editing [contenteditable]{outline:1px dashed rgba(103,232,249,.5);outline-offset:4px;border-radius:3px;cursor:text;}
+.editing [contenteditable]:focus{outline:2px solid var(--cyan);background:rgba(56,189,248,.08);}
+.edit-banner{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:10001;background:var(--azure);color:#04121f;font-weight:600;font-size:14px;padding:8px 18px;border-radius:100px;display:none;align-items:center;gap:14px;}
+.edit-banner.show{display:flex;}
+.edit-banner button{background:#04121f;color:#cfe0ff;border:none;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================== SLIDE 1 — TITLE ============================== -->
+    <section class="slide title-slide active">
+      <div class="frame">
+        <div class="topbar">
+          <div class="wordmark"><span class="dot"></span>Sainoforce</div>
+          <div class="status-pill"><span class="blip"></span>Proposal for approval</div>
+        </div>
+        <div class="t-hero">
+          <p class="t-eyebrow reveal d1">HRMS · Agent Module · 2026 Roadmap</p>
+          <h1 class="t-title">
+            <span class="l1 reveal d2"><span>HRMS AI Module</span></span>
+            <span class="l2 reveal d3"><span class="hl">Future Plans</span></span>
+          </h1>
+          <div class="t-rule reveal d4"></div>
+          <p class="t-sub reveal d5">A single business case for <b>three AI initiatives</b> — cost visibility, an agentic HR assistant, and self-service knowledge operations.</p>
+        </div>
+        <div class="t-foot reveal d6">
+          <div><div class="who">Wong Jun Meng</div><div class="role">Prepared for Sainoforce leadership</div></div>
+          <div class="meta"><b>June 2026</b><br>Three plans · One platform</div>
+        </div>
+      </div>
+      <!-- ambient rising-chart motif -->
+      <svg class="t-viz" viewBox="0 0 480 270" fill="none" aria-hidden="true">
+        <g stroke="rgba(120,160,220,.16)" stroke-width="1"><line x1="0" y1="55" x2="480" y2="55"/><line x1="0" y1="130" x2="480" y2="130"/><line x1="0" y1="205" x2="480" y2="205"/></g>
+        <g fill="url(#tg)">
+          <rect x="34"  y="150" width="52" height="120" rx="6"/><rect x="128" y="108" width="52" height="162" rx="6"/>
+          <rect x="222" y="80"  width="52" height="190" rx="6"/><rect x="316" y="46"  width="52" height="224" rx="6"/>
+          <rect x="410" y="24"  width="52" height="246" rx="6"/>
+        </g>
+        <polyline points="60,142 154,100 248,72 342,40 436,20" stroke="#67e8f9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px rgba(103,232,249,.8))"/>
+        <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity=".85"/><stop offset="1" stop-color="#2563eb" stop-opacity=".12"/></linearGradient></defs>
+      </svg>
+    </section>
+
+    <!-- ============================== SLIDE 2 — TABLE OF CONTENTS ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head"><p class="eyebrow reveal d1">What we'll cover</p><h2 class="s-title reveal d2">Contents</h2></div>
+        <div class="s-body">
+          <div class="toc-list">
+            <div class="toc-item reveal d2"><div class="n">01</div><div><div class="tt">The Opportunity</div><div class="dd">Three moves to make our HR AI smarter — and safer</div></div></div>
+            <div class="toc-item reveal d3"><div class="n">02</div><div><div class="tt">AI Usage &amp; Cost Dashboard</div><div class="dd">See &amp; control every ringgit and token we spend</div></div></div>
+            <div class="toc-item reveal d4"><div class="n">03</div><div><div class="tt">Agentic AI Assistant (LEXA)</div><div class="dd">From a policy bot to a multi-skill HR assistant</div></div></div>
+            <div class="toc-item reveal d5"><div class="n">04</div><div><div class="tt">Self-Service Knowledge Ops</div><div class="dd">Safe, web-based, human-approved updates</div></div></div>
+            <div class="toc-item reveal d6"><div class="n">05</div><div><div class="tt">Roadmap &amp; Investment</div><div class="dd">Phased delivery and a very low running cost</div></div></div>
+            <div class="toc-item reveal d7"><div class="n">06</div><div><div class="tt">The Ask</div><div class="dd">What we're requesting today, and why now</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">HRMS AI Module Future Plans</span><span class="dotline"></span><span>Sainoforce · Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 3 — THE OPPORTUNITY ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">01 · The Opportunity</p>
+          <h2 class="s-title reveal d2">Three moves to make our HR AI smarter — <span class="hl">and safer</span></h2>
+        </div>
+        <div class="s-body">
+          <p class="reveal d2" style="font-size:24px;color:#cdd9ee;line-height:1.5;max-width:1500px;margin-bottom:34px;">Our HRMS has started using AI. These three initiatives let us <b style="color:#fff">do more with it while keeping cost and quality firmly in our control</b>. Each reuses systems we already run and is delivered in phases — so value lands early and risk stays low.</p>
+          <div class="opp-grid">
+            <div class="opp reveal d3"><div class="glow"></div><div class="num">01 · See &amp; control</div><div class="ti">Know what AI costs</div><div class="de">One screen for spend, tokens &amp; requests — by user, module and provider — with alerts and budget caps.</div></div>
+            <div class="opp reveal d4"><div class="glow"></div><div class="num">02 · Do more</div><div class="ti">A multi-skill assistant</div><div class="de">Turn our policy bot into an assistant that also helps with recruitment and produces downloadable documents.</div></div>
+            <div class="opp reveal d5"><div class="glow"></div><div class="num">03 · Stay in control</div><div class="ti">Trustworthy knowledge</div><div class="de">Let HR safely update what the chatbot knows, with a person approving every step before it goes live.</div></div>
+          </div>
+          <div class="chips reveal d6" style="margin-top:32px;">
+            <span class="chip good"><span class="d"></span>Reuses what we already run</span>
+            <span class="chip good"><span class="d"></span>Delivered in phases</span>
+            <span class="chip good"><span class="d"></span>Humans stay in control</span>
+            <span class="chip good"><span class="d"></span>Value lands early</span>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">The Opportunity</span><span class="dotline"></span><span>Sainoforce · Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 4 — PLAN 1: PROBLEM & SOLUTION ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">02 · Plan 1 — AI Usage &amp; Cost Dashboard</p>
+          <h2 class="s-title reveal d2">See — and control — <span class="hl">every ringgit and token</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="cols-2">
+            <div class="panel reveal d3">
+              <h3><span class="ico">!</span>The problem today</h3>
+              <ul class="bullets pain">
+                <li><span class="mk"></span><div><b>Spend is split across providers.</b><span class="sub">To see costs we log into each provider's site separately — no single view.</span></div></li>
+                <li><span class="mk"></span><div><b>One shared key for everything.</b><span class="sub">We can't tell which feature — resume parsing, comparison, chatbot — spends what.</span></div></li>
+                <li><span class="mk"></span><div><b>No per-person view.</b><span class="sub">We can't allocate cost fairly or coach heavy users.</span></div></li>
+                <li><span class="mk"></span><div><b>No early warning.</b><span class="sub">A runaway feature could quietly run up a large bill before anyone notices.</span></div></li>
+              </ul>
+            </div>
+            <div class="panel reveal d4">
+              <h3><span class="ico">✓</span>What it is</h3>
+              <ul class="bullets win">
+                <li><span class="mk"></span><div><b>One dashboard inside HRMS</b><span class="sub">Styled like the familiar OpenAI usage page — no new tool to learn.</span></div></li>
+                <li><span class="mk"></span><div><b>Spend, tokens &amp; requests</b><span class="sub">Broken down by user, by module, and by API key.</span></div></li>
+                <li><span class="mk"></span><div><b>Alerts &amp; soft caps</b><span class="sub">Notify at 80% of budget; optionally block at 100% until reviewed.</span></div></li>
+                <li><span class="mk"></span><div><b>Admin-only (HR / HOD)</b><span class="sub">Uses the access rules HRMS already has.</span></div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout reveal d5">💡 <b>Good news:</b> the usage data we need is already produced by every AI call today — we simply aren't recording it yet. Capturing it is straightforward and reuses the systems we already have.</div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 1 · Cost Visibility</span><span class="dotline"></span><span>Sainoforce · Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 5 — PLAN 1: THE VALUE (charts) ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">02 · Plan 1 — The Value</p>
+          <h2 class="s-title reveal d2">Small spend today. <span class="hl">Big control as it scales.</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="cols-2" style="grid-template-columns:1.05fr .95fr;">
+            <!-- bar chart: spend by module -->
+            <div class="panel reveal d3" style="display:flex;flex-direction:column;">
+              <h3>Where the money goes — spend by module</h3>
+              <div class="barchart">
+                <div class="bar"><div class="track"><div class="col" style="--h:100%;--c1:#38bdf8;--c2:rgba(37,99,235,.2)"><span class="v">$9.67</span></div></div><div class="lab">Candidate<br>comparison</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:38%;--c1:#67e8f9;--c2:rgba(37,99,235,.2)"><span class="v">$3.70</span></div></div><div class="lab">Resume<br>parsing</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:4%;--c1:#a78bfa;--c2:rgba(167,139,250,.2)"><span class="v">$0.33</span></div></div><div class="lab">HR<br>chatbot</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:1.5%;--c1:#7f9cf5;--c2:rgba(127,156,245,.2)"><span class="v">$0.03</span></div></div><div class="lab">DeepSeek<br>backup</div></div>
+              </div>
+            </div>
+            <!-- budget gauge + stats -->
+            <div style="display:flex;flex-direction:column;gap:24px;">
+              <div class="panel reveal d4">
+                <h3>This month vs budget</h3>
+                <div style="font-family:var(--font-display);font-weight:600;font-size:40px;color:#fff;margin-bottom:8px;">$13.73 <span style="font-size:24px;color:var(--muted)">of $100.00 · 14%</span></div>
+                <div class="gauge-wrap">
+                  <div class="gauge">
+                    <div class="fill" style="--w:14%;"></div>
+                    <div class="mark" style="left:80%;--m:var(--warn)"><span class="t">80% · alert</span></div>
+                    <div class="mark" style="left:100%;--m:var(--bad)"><span class="t">100% · cap</span></div>
+                  </div>
+                  <div class="gauge-scale"><span>$0</span><span>$100 budget</span></div>
+                </div>
+              </div>
+              <div class="stats reveal d5" style="grid-template-columns:1fr 1fr 1fr;">
+                <div class="stat"><div class="v">9.33<small>M</small></div><div class="l">tokens used</div></div>
+                <div class="stat"><div class="v">177</div><div class="l">requests</div></div>
+                <div class="stat"><div class="v">3</div><div class="l">providers covered</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="chips reveal d6" style="margin-top:26px;">
+            <span class="chip good"><span class="d"></span>Right-size models + caching → typically <b style="margin-left:6px">10–20% saved</b></span>
+            <span class="chip good"><span class="d"></span>No bill-shock</span>
+            <span class="chip"><span class="d"></span>~3–5 weeks to build</span>
+            <span class="chip"><span class="d"></span>~RM 0 / month to run (reuses our servers)</span>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 1 · The Value</span><span class="dotline"></span><span>Illustrative figures · USD as billed by providers</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 6 — PLAN 2: OPPORTUNITY & SOLUTION ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">03 · Plan 2 — Agentic AI Assistant (LEXA)</p>
+          <h2 class="s-title reveal d2">From a policy bot to a <span class="hl">multi-skill HR assistant</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="cols-2" style="grid-template-columns:.92fr 1.08fr;">
+            <div class="panel reveal d3">
+              <h3>The opportunity</h3>
+              <p style="font-size:22px;color:#cdd9ee;line-height:1.5;">Today LEXA answers only <b style="color:#fff">company policy &amp; Malaysian law</b>. But most real HR questions cross boundaries:</p>
+              <div style="margin:20px 0;border-left:3px solid var(--azure);padding:6px 0 6px 20px;font-size:21px;color:#dbeafe;font-style:italic;line-height:1.45;">"Can we rescind this candidate's offer — and what does the law say?"</div>
+              <p style="font-size:22px;color:#cdd9ee;line-height:1.5;">That touches recruitment <i>and</i> the law. Right now a person has to stitch these together by hand.</p>
+              <div class="callout" style="margin-top:22px;">One <b>shared memory</b> is the key advantage — skills pass context to each other and remember the conversation.</div>
+            </div>
+            <div class="panel reveal d4" style="display:flex;flex-direction:column;justify-content:center;">
+              <h3 style="justify-content:center;">The upgrade — one assistant, many skills</h3>
+              <div class="hub"><div class="t">LEXA — one smart assistant</div><div class="s">SHARED MEMORY ACROSS SKILLS</div></div>
+              <svg class="spokes" viewBox="0 0 100 54" preserveAspectRatio="none" aria-hidden="true">
+                <g stroke="rgba(103,232,249,.55)" stroke-width=".5" fill="none">
+                  <path d="M50 0 C50 28, 17 20, 17 54"/><path d="M50 0 L50 54"/><path d="M50 0 C50 28, 83 20, 83 54"/>
+                </g>
+              </svg>
+              <div class="skill-row">
+                <div class="skill"><div class="ic">⚖️</div><div class="t">Policy &amp; Law</div><div class="d">Employment acts + company policy</div><span class="tag">All users</span></div>
+                <div class="skill"><div class="ic">🎯</div><div class="t">Recruitment</div><div class="d">Candidate ↔ job fit, ranked shortlists</div><span class="tag">Admin only</span></div>
+                <div class="skill"><div class="ic">📄</div><div class="t">Documents</div><div class="d">Export PDF · Word · Excel</div><span class="tag">All users</span></div>
+              </div>
+              <p style="text-align:center;font-size:17px;color:var(--muted);margin-top:18px;">Nothing goes away — today's policy bot simply becomes one of the skills.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 2 · Capability</span><span class="dotline"></span><span>Sainoforce · Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 7 — PLAN 2: THE VALUE (charts) ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">03 · Plan 2 — The Value</p>
+          <h2 class="s-title reveal d2">~RM 53,000 a year in value — <span class="hl">for ~RM 40,000 in cost</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="cols-2" style="grid-template-columns:1.1fr .9fr;">
+            <!-- value drivers bar chart -->
+            <div class="panel reveal d3" style="display:flex;flex-direction:column;">
+              <h3>Where the annual value comes from</h3>
+              <div class="barchart">
+                <div class="bar"><div class="track"><div class="col" style="--h:100%;--c1:#38bdf8;--c2:rgba(37,99,235,.2)"><span class="v">RM 16.1k</span></div></div><div class="lab">Recruiter<br>screening time</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:91%;--c1:#67e8f9;--c2:rgba(37,99,235,.2)"><span class="v">RM 14.7k</span></div></div><div class="lab">HR<br>self-service</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:75%;--c1:#a78bfa;--c2:rgba(167,139,250,.2)"><span class="v">RM 12.0k</span></div></div><div class="lab">Faster<br>time-to-hire</div></div>
+                <div class="bar"><div class="track"><div class="col" style="--h:62%;--c1:#7f9cf5;--c2:rgba(127,156,245,.2)"><span class="v">RM 10.0k</span></div></div><div class="lab">Better-fit<br>hires</div></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <!-- value vs cost -->
+              <div class="panel reveal d4">
+                <h3>Value vs running cost (per year)</h3>
+                <div style="display:flex;flex-direction:column;gap:16px;margin-top:6px;">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:18px;color:#cdd9ee;margin-bottom:7px;"><span>Value created</span><b style="color:#fff;font-family:var(--font-display)">~RM 53,000</b></div>
+                    <div class="gauge"><div class="fill" style="--w:100%;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:18px;color:#cdd9ee;margin-bottom:7px;"><span>Cost (cloud)</span><b style="color:#fff;font-family:var(--font-display)">~RM 40,000</b></div>
+                    <div class="gauge"><div class="fill" style="--w:75%;background:linear-gradient(90deg,#a78bfa,#7f9cf5);box-shadow:none;"></div></div>
+                  </div>
+                </div>
+                <p style="font-size:16px;color:var(--muted);margin-top:14px;">The biggest, least-measurable win: <b style="color:var(--cyan)">consistency &amp; trust</b> — every answer grounded in our own policy, law and records.</p>
+              </div>
+              <!-- payback crossover -->
+              <div class="panel reveal d5">
+                <h3>Own hardware pays for itself in ~7 months</h3>
+                <svg viewBox="0 0 600 150" style="width:100%;height:auto;display:block;" aria-hidden="true">
+                  <g stroke="rgba(120,160,220,.14)" stroke-width="1"><line x1="50" y1="16" x2="560" y2="16"/><line x1="50" y1="73" x2="560" y2="73"/><line x1="50" y1="130" x2="560" y2="130"/></g>
+                  <!-- cloud cumulative (steep) -->
+                  <polyline points="50,130 177.5,102.8 305,75.7 347.5,66.6 432.5,48.5 560,21.4" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <!-- own hardware cumulative (high start, flat) -->
+                  <polyline points="50,72.6 177.5,69.7 305,66.7 347.5,65.8 432.5,63.8 560,60.9" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="347.5" cy="66" r="6" fill="#67e8f9" style="filter:drop-shadow(0 0 6px #67e8f9)"/>
+                  <text x="358" y="56" fill="#cfe0ff" font-size="14" font-family="Satoshi,sans-serif">≈ month 7</text>
+                  <text x="50" y="146" fill="#6f86a8" font-size="13">0</text><text x="520" y="146" fill="#6f86a8" font-size="13">12 mo</text>
+                </svg>
+                <div class="legend"><span><i style="background:#a78bfa"></i>Cloud · RM 3,335/mo</span><span><i style="background:#38bdf8"></i>Own · RM 360/mo</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 2 · The Value</span><span class="dotline"></span><span>Illustrative, assumption-based estimates — adjust to real team size &amp; rates</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 8 — PLAN 3: PROBLEM & SOLUTION ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">04 · Plan 3 — Self-Service Knowledge Ops</p>
+          <h2 class="s-title reveal d2">Safe, self-service updates to <span class="hl">what the chatbot knows</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="cols-2" style="grid-template-columns:.86fr 1.14fr;">
+            <div class="panel reveal d3">
+              <h3><span class="ico">!</span>The problem today</h3>
+              <ul class="bullets pain">
+                <li><span class="mk"></span><div><b>Manual, developer-only chore.</b><span class="sub">HR waits in a queue; simple policy updates take longer than they should.</span></div></li>
+                <li><span class="mk"></span><div><b>No versioning.</b><span class="sub">No clean record of what changed when, and no easy rollback.</span></div></li>
+                <li><span class="mk"></span><div><b>Stale-content risk.</b><span class="sub">Leftover fragments of an old version can stay live and be quoted by the bot.</span></div></li>
+                <li><span class="mk"></span><div><b>No audit trail.</b><span class="sub">Hard to show, for compliance, who approved what going live.</span></div></li>
+              </ul>
+            </div>
+            <div class="panel reveal d4" style="display:flex;flex-direction:column;">
+              <h3><span class="ico">✓</span>A controlled assembly line, with inspection points</h3>
+              <p style="font-size:20px;color:#cdd9ee;line-height:1.45;margin-bottom:22px;">A document enters; the system cleans, structures and prepares it; <b style="color:#fff">a person approves each stage</b>; only approved content goes live.</p>
+              <div class="flow">
+                <div class="stage"><div class="n">1</div><div class="t">Upload</div><div class="d">Add PDF, pick area</div></div>
+                <div class="arrow"><span class="gate">GATE</span>→</div>
+                <div class="stage"><div class="n">2</div><div class="t">Extract</div><div class="d">Clean text + preview</div></div>
+                <div class="arrow"><span class="gate">GATE</span>→</div>
+                <div class="stage"><div class="n">3</div><div class="t">Chunk</div><div class="d">Structure sections</div></div>
+                <div class="arrow"><span class="gate">GATE</span>→</div>
+                <div class="stage"><div class="n">4</div><div class="t">Ingest</div><div class="d">Publish to bot</div></div>
+                <div class="arrow">→</div>
+                <div class="stage"><div class="n">5</div><div class="t">Verify</div><div class="d">Confirm it landed</div></div>
+              </div>
+              <div class="callout" style="margin-top:24px;">Reuses the tools already built — what's new is the <b>conveyor belt and the inspection points</b>, all through a simple web screen in HRMS.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 3 · Trust &amp; Self-Service</span><span class="dotline"></span><span>Business view · Sainoforce Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 9 — PLAN 3: THE VALUE (before/after) ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">04 · Plan 3 — The Value</p>
+          <h2 class="s-title reveal d2">From days of waiting <span class="hl">to minutes of review</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="ba reveal d3">
+            <div class="row head"><div class="h">What changes</div><div class="h">Before</div><div class="h">After</div></div>
+            <div class="row"><div class="k">Time to publish</div><div class="before"><span class="x">✕</span>Engineer availability + manual steps</div><div class="after"><span class="c">✓</span>HR self-serves — minutes of review</div></div>
+            <div class="row"><div class="k">Answer accuracy</div><div class="before"><span class="x">✕</span>Risk of stale fragments after updates</div><div class="after"><span class="c">✓</span>Clean replace — old content fully removed</div></div>
+            <div class="row"><div class="k">Who can do it</div><div class="before"><span class="x">✕</span>Developer only</div><div class="after"><span class="c">✓</span>Trained HR admin, engineering on call</div></div>
+            <div class="row"><div class="k">Confidence &amp; compliance</div><div class="before"><span class="x">✕</span>No version history or audit</div><div class="after"><span class="c">✓</span>Versioned, logged, reversible, sign-off recorded</div></div>
+            <div class="row"><div class="k">Scalability</div><div class="before"><span class="x">✕</span>Painful as the library grows</div><div class="after"><span class="c">✓</span>Per-document — scales smoothly</div></div>
+          </div>
+          <div class="chips reveal d5" style="margin-top:26px;">
+            <span class="chip good"><span class="d"></span>Time-to-publish: <b style="margin-left:6px">hours, not days</b></span>
+            <span class="chip good"><span class="d"></span>Zero stale-content incidents</span>
+            <span class="chip good"><span class="d"></span>100% of the library versioned</span>
+            <span class="chip good"><span class="d"></span>Majority of updates without engineering</span>
+          </div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Plan 3 · The Value</span><span class="dotline"></span><span>Target KPIs · Sainoforce Confidential</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 10 — ROADMAP ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">05 · Roadmap</p>
+          <h2 class="s-title reveal d2">Each plan delivers value from <span class="hl">its very first phase</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="road">
+            <div class="lane reveal d3">
+              <div class="name">Plan 1 · Cost Dashboard<span class="s">3 short phases</span></div>
+              <div class="track-row">
+                <div class="ph start"><span class="flag">Start here</span><div class="p">Phase 1</div><div class="t">Capture usage on every call</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 2</div><div class="t">Full dashboard &amp; breakdowns</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 3</div><div class="t">Alerts &amp; budget caps</div></div>
+              </div>
+            </div>
+            <div class="lane reveal d4">
+              <div class="name">Plan 2 · Agentic Assistant<span class="s">4 phases on the GPU we run</span></div>
+              <div class="track-row">
+                <div class="ph start"><span class="flag">Start here</span><div class="p">Phase 1</div><div class="t">Highest-value, lowest-risk skill</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 2</div><div class="t">Add second skill</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 3</div><div class="t">Shared memory &amp; cross-module</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 4</div><div class="t">Reach &amp; robustness</div></div>
+              </div>
+            </div>
+            <div class="lane reveal d5">
+              <div class="name">Plan 3 · Knowledge Ops<span class="s">3 phases</span></div>
+              <div class="track-row">
+                <div class="ph start"><span class="flag">Start here</span><div class="p">Phase 0</div><div class="t">Fix the stale-content defect</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 1</div><div class="t">Orchestrator + web UI</div></div>
+                <span class="conn">→</span>
+                <div class="ph"><div class="p">Phase 2</div><div class="t">In HRMS + audit &amp; rollback</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="callout reveal d6" style="margin-top:8px;">Low-risk by design: we <b>prove each step before starting the next</b> — and every plan is useful after its first phase.</div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Roadmap</span><span class="dotline"></span><span>Phase labels for Plan 2 are illustrative — exact order in the detailed plan</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 11 — INVESTMENT ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">05 · Investment</p>
+          <h2 class="s-title reveal d2">Mostly our own time. <span class="hl">Almost nothing to run.</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="inv-grid">
+            <div class="inv reveal d3">
+              <div class="tag">Plan 1 · Cost Dashboard</div>
+              <div class="name">Cost Visibility</div>
+              <div class="metric"><div class="v">~3–5 <small>weeks</small></div><div class="l">one-time build (phased)</div></div>
+              <div class="metric"><div class="v">~RM 0 <small>/mo</small></div><div class="l">running cost</div></div>
+              <div class="foot">✓ Reuses our servers + database</div>
+            </div>
+            <div class="inv reveal d4">
+              <div class="tag">Plan 2 · Agentic Assistant</div>
+              <div class="name">Capability</div>
+              <div class="metric"><div class="v">~9–12 <small>weeks</small></div><div class="l">one-time build (4 phases)</div></div>
+              <div class="metric"><div class="v">RM 40k → 4.3k <small>/yr</small></div><div class="l">cloud now → own hardware later (RM 21,150 one-time, ~7-mo payback)</div></div>
+              <div class="foot">✓ Reuses the GPU we already run</div>
+            </div>
+            <div class="inv reveal d5">
+              <div class="tag">Plan 3 · Knowledge Ops</div>
+              <div class="name">Trust &amp; Self-Service</div>
+              <div class="metric"><div class="v">Phased <small>· Phase 0 small</small></div><div class="l">biggest correctness win comes first</div></div>
+              <div class="metric"><div class="v">~RM 0 <small>/mo</small></div><div class="l">on our own hardware (or a modest cloud fee)</div></div>
+              <div class="foot">✓ Reuses pipeline + HRMS login</div>
+            </div>
+          </div>
+          <div class="callout reveal d6" style="margin-top:30px;">Build effort is largely <b>existing team time</b>. A contractor equivalent for the assistant alone would be ~RM 30,000–40,000. Plans 1 &amp; 3 need <b>no new servers or subscriptions</b>.</div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Investment at a glance</span><span class="dotline"></span><span>Estimates in MYR · AI provider prices billed in USD</span></div>
+    </section>
+
+    <!-- ============================== SLIDE 12 — THE ASK / CONCLUSION ============================== -->
+    <section class="slide">
+      <div class="frame">
+        <div class="s-head">
+          <p class="eyebrow reveal d1">06 · The Ask</p>
+          <h2 class="s-title reveal d2">Approve the first phase of each — <span class="hl">low risk, high return</span></h2>
+        </div>
+        <div class="s-body">
+          <div class="ask-rows">
+            <div class="ask-row reveal d3"><div class="n">01</div><div><div class="nm">Control AI cost before the bills grow</div><div class="ds">AI Usage &amp; Cost Dashboard — visibility, alerts and caps</div></div><div class="val">10–20% savings · ~RM 0 to run</div></div>
+            <div class="ask-row reveal d4"><div class="n">02</div><div><div class="nm">Do more with HR</div><div class="ds">Agentic assistant — recruitment, documents &amp; joined-up answers</div></div><div class="val">~RM 53k/yr value · 7-mo payback</div></div>
+            <div class="ask-row reveal d5"><div class="n">03</div><div><div class="nm">Trustworthy, self-service knowledge</div><div class="ds">Human-approved updates with versioning &amp; audit</div></div><div class="val">days → minutes · zero stale content</div></div>
+          </div>
+          <div class="ask-box reveal d6">
+            <div class="h">What we're asking for today</div>
+            <p>A green-light to start the <b>lowest-risk, highest-value first phase</b> of each plan, on the systems we already run. Each proves its value before any larger commitment — so we capture the upside while keeping cost and risk firmly contained.</p>
+          </div>
+          <div class="tagline-final reveal d7">Reuse what we run · Deliver in phases · Keep people in control</div>
+        </div>
+      </div>
+      <div class="s-foot"><span class="b">Wong Jun Meng · Prepared for Sainoforce leadership</span><span class="dotline"></span><span>June 2026 · Proposal for approval</span></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== DECK CHROME ===== -->
+<div class="deck-controls" role="navigation" aria-label="Slide navigation">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="count" id="counter">01 / 12</span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+<div class="hint">← → / Space to navigate · E to edit</div>
+
+<!-- inline editor controls -->
+<div class="edit-hotzone" id="editHotzone" title="Edit mode (E)"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+<div class="edit-banner" id="editBanner"><span>✏️ Edit mode — click any text to change it</span><button id="saveBtn">Save copy (Ctrl+S)</button><button id="exitEdit">Done</button></div>
+
+<script>
+/* =====================================================================
+   SLIDE PRESENTATION CONTROLLER
+   - Fixed 16:9 stage scaling
+   - Keyboard / wheel / touch navigation
+   - Reveal + chart animations driven by the .visible class
+   ===================================================================== */
+class SlidePresentation{
+  constructor(){
+    this.slides=[...document.querySelectorAll('.slide')];
+    this.stage=document.getElementById('deckStage');
+    this.current=0;
+    this.counter=document.getElementById('counter');
+    this.progress=document.getElementById('progress');
+    this.setupScale();
+    this.setupKeyboard();
+    this.setupWheel();
+    this.setupTouch();
+    this.setupAutoHide();
+    document.getElementById('prevBtn').onclick=()=>this.go(this.current-1);
+    document.getElementById('nextBtn').onclick=()=>this.go(this.current+1);
+    this.show(0);
+  }
+  setupScale(){
+    const scale=()=>{
+      const f=Math.min(innerWidth/1920,innerHeight/1080);
+      const x=(innerWidth-1920*f)/2, y=(innerHeight-1080*f)/2;
+      this.stage.style.transform=`translate(${x}px,${y}px) scale(${f})`;
+    };
+    scale();addEventListener('resize',scale);
+  }
+  setupKeyboard(){
+    addEventListener('keydown',e=>{
+      if(document.body.classList.contains('editing'))return; // don't navigate while editing text
+      if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();this.go(this.current+1);}
+      else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();this.go(this.current-1);}
+      else if(e.key==='Home'){this.go(0);}
+      else if(e.key==='End'){this.go(this.slides.length-1);}
+    });
+  }
+  setupWheel(){
+    let lock=false;
+    addEventListener('wheel',e=>{
+      if(document.body.classList.contains('editing'))return;
+      if(lock)return;
+      if(Math.abs(e.deltaY)<24)return;
+      lock=true;this.go(this.current+(e.deltaY>0?1:-1));
+      setTimeout(()=>lock=false,650);
+    },{passive:true});
+  }
+  setupTouch(){
+    let x0=null,y0=null;
+    addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+    addEventListener('touchend',e=>{
+      if(x0===null)return;
+      const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+      if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))this.go(this.current+(dx<0?1:-1));
+      x0=y0=null;
+    },{passive:true});
+  }
+  setupAutoHide(){
+    // Fade the floating controls/hint after a few seconds idle so they never
+    // obscure slide content; bring them back on any pointer/keyboard activity.
+    let t=null;
+    const wake=()=>{document.body.classList.remove('chrome-hidden');clearTimeout(t);t=setTimeout(()=>{if(!document.body.classList.contains('editing'))document.body.classList.add('chrome-hidden');},2800);};
+    ['mousemove','keydown','wheel','touchstart','click'].forEach(ev=>addEventListener(ev,wake,{passive:true}));
+    wake();
+  }
+  go(i){this.show(Math.max(0,Math.min(i,this.slides.length-1)));}
+  show(i){
+    this.current=i;
+    this.slides.forEach((s,k)=>{s.classList.toggle('active',k===i);s.classList.toggle('visible',k===i);});
+    const n=String(i+1).padStart(2,'0'), t=String(this.slides.length).padStart(2,'0');
+    this.counter.textContent=`${n} / ${t}`;
+    this.progress.style.width=((i+1)/this.slides.length*100)+'%';
+  }
+}
+
+/* =====================================================================
+   INLINE EDITOR — hover top-left or press E. Edits any text; Ctrl+S saves a copy.
+   ===================================================================== */
+class InlineEditor{
+  constructor(){
+    this.isActive=false;
+    this.toggle=document.getElementById('editToggle');
+    this.hotzone=document.getElementById('editHotzone');
+    this.banner=document.getElementById('editBanner');
+    this.editable=[...document.querySelectorAll('.s-title,.t-title span,.t-sub,.eyebrow,.t-eyebrow,h3,.opp .ti,.opp .de,.bullets li,.callout,.chip,.lab,.toc-item .tt,.toc-item .dd,.skill .t,.skill .d,.stage .t,.stage .d,.ba .k,.ba .before,.ba .after,.ph .t,.inv .name,.inv .metric .l,.ask-row .nm,.ask-row .ds,.ask-row .val,.ask-box .h,.ask-box p,.tagline-final,.t-foot .who,.t-foot .role')];
+    let hide=null;
+    const show=()=>{clearTimeout(hide);this.toggle.classList.add('show');};
+    const sched=()=>{hide=setTimeout(()=>{if(!this.isActive)this.toggle.classList.remove('show');},400);};
+    this.hotzone.addEventListener('mouseenter',show);
+    this.hotzone.addEventListener('mouseleave',sched);
+    this.toggle.addEventListener('mouseenter',()=>clearTimeout(hide));
+    this.toggle.addEventListener('mouseleave',sched);
+    this.hotzone.addEventListener('click',()=>this.toggleMode());
+    this.toggle.addEventListener('click',()=>this.toggleMode());
+    document.getElementById('exitEdit').addEventListener('click',()=>this.toggleMode());
+    document.getElementById('saveBtn').addEventListener('click',()=>this.save());
+    addEventListener('keydown',e=>{
+      if((e.key==='e'||e.key==='E')&&!e.target.getAttribute('contenteditable')){this.toggleMode();}
+      if((e.ctrlKey||e.metaKey)&&e.key==='s'&&this.isActive){e.preventDefault();this.save();}
+    });
+    this.restore();
+  }
+  toggleMode(){
+    this.isActive=!this.isActive;
+    document.body.classList.toggle('editing',this.isActive);
+    this.toggle.classList.toggle('active',this.isActive);
+    this.banner.classList.toggle('show',this.isActive);
+    this.editable.forEach(el=>{el.contentEditable=this.isActive;
+      if(this.isActive){el.addEventListener('blur',this._persist=()=>this.persist());}
+    });
+  }
+  persist(){try{const d={};this.editable.forEach((el,i)=>d[i]=el.innerHTML);localStorage.setItem('hrms_deck_edits',JSON.stringify(d));}catch(e){}}
+  restore(){try{const d=JSON.parse(localStorage.getItem('hrms_deck_edits')||'null');if(d)this.editable.forEach((el,i)=>{if(d[i]!=null)el.innerHTML=d[i];});}catch(e){}}
+  save(){
+    this.persist();
+    const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+    const blob=new Blob([html],{type:'text/html'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='HRMS-AI-Future-Plans.html';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{new SlidePresentation();new InlineEditor();});
+</script>
+</body>
+</html>
