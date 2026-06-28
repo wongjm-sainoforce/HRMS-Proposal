@@ -1,8 +1,8 @@
 # HRMS AI Module — Future Plans
 
-A web-based business case presenting **three AI initiatives** for the Sainoforce HRMS platform, prepared for leadership approval.
+A web-based business case presenting **three AI initiatives** for the HRMS platform, prepared for leadership approval.
 
-**Prepared by:** Wong Jun Meng · **For:** Sainoforce leadership · **Date:** June 2026
+**Prepared by:** Wong Jun Meng · **Date:** June 2026
 
 ## 🔗 View the presentation
 
@@ -15,7 +15,7 @@ Or open `index.html` in any modern browser — it is a single, self-contained fi
 | # | Plan | In one line |
 |---|------|-------------|
 | 1 | **AI Usage & Cost Dashboard** | See & control every ringgit and token our HR AI features spend — by user, module and provider, with alerts and budget caps. |
-| 2 | **Agentic AI Assistant (LEXA)** | Upgrade the policy chatbot into a multi-skill assistant (policy/law + recruitment + documents) with one shared memory. |
+| 2 | **Agentic AI Assistant** | Upgrade the policy chatbot into a multi-skill assistant with one shared memory. |
 | 3 | **Self-Service Knowledge Ops** | Turn a manual, developer-only update chore into a safe, web-based, human-approved workflow. |
 
 The deck covers, for each plan: the problem, the solution, the value/ROI (with charts), plus a combined roadmap, investment summary and the ask.
@@ -34,4 +34,4 @@ The deck covers, for each plan: the problem, the solution, the value/ROI (with c
 
 ---
 
-*Figures in this deck are transparent, assumption-based estimates for discussion — not guarantees. Confidential to Sainoforce.*
+*Figures in this deck are transparent, assumption-based estimates for discussion — not guarantees.*
